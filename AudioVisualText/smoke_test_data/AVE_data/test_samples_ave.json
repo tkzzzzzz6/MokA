@@ -1,0 +1,14 @@
+[
+  {
+    "event": "Dog barking",
+    "vid": "test_sample_01",
+    "start_time": 0,
+    "end_time": 10
+  },
+  {
+    "event": "Playing guitar",
+    "vid": "test_sample_02",
+    "start_time": 5,
+    "end_time": 15
+  }
+]

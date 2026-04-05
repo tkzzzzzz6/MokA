@@ -1,0 +1,1 @@
+uv sync --no-cache --index-url https://pypi.tuna.tsinghua.edu.cn/simple
