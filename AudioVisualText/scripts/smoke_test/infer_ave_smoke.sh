@@ -10,10 +10,10 @@ MASTER_PORT=6688
 RANK=0
 
 # ========== PLEASE MODIFY THESE PATHS ==========
-llama_ckpt_path=YOUR_LLAMA_PATH
-ckpt_dir=YOUR_CHECKPOINT_PATH  # Path to your fine-tuned checkpoint
-vit_ckpt_path=YOUR_CLIP_PATH
-BEATs_ckpt_path=YOUR_BEATS_PATH
+llama_ckpt_path=/root/autodl-tmp/MokA/AudioVisualText/models/Llama-2-7b-chat-hf
+ckpt_dir=YOUR_CHECKPOINT_PATH  # Path to your fine-tuned checkpoint (after training)
+vit_ckpt_path=/root/autodl-tmp/MokA/AudioVisualText/models/clip-vit-large-patch14
+BEATs_ckpt_path=/root/autodl-tmp/MokA/AudioVisualText/models/BEATs_iter3_plus_AS2M_finetuned_on_AS2M_cpt2.pt
 # ==============================================
 
 # Local batch size - 1 for smoke test
