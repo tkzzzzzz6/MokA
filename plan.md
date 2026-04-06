@@ -147,4 +147,47 @@ BEATs_ckpt_path=/path/to/AudioVisualText/models/BEATs_iter3_plus_AS2M_finetuned_
 bash scripts/finetune/ft_ave.sh
 ```
 
+---
+
+## 📦 直接使用作者微调好的模型（推荐）
+
+作者已经在 Hugging Face 发布了微调好的检查点，可以直接下载推理：
+
+### 仓库说明
+
+| 仓库 | 模态 | 任务 | 大小 |
+|------|------|------|------|
+| `yake0409/MokA_VisualText` | 👁️ 仅视觉+文本 | 图像/视频问答 | ~...GB |
+| `yake0409/MokA_AudioVisualText` | 👁️🔊 音频+视觉+文本 | 音视频问答（你当前项目） | ~...GB |
+
+在 `yake0409/MokA_AudioVisualText` 中，作者提供：
+- `AVE_checkpoint/` - AVE 数据集微调完成的检查点
+- `AVQA_checkpoint/` - MUSIC-AVQA 数据集微调完成的检查点
+
+### 下载命令
+
+```bash
+export HF_ENDPOINT=https://hf-mirror.com
+cd /root/autodl-tmp/MokA
+
+# 1. 下载整个 AudioVisualText 检查点仓库
+mkdir -p MokA_AudioVisualText
+huggingface-cli download yake0409/MokA_AudioVisualText --local-dir MokA_AudioVisualText
+
+# 或者，只下载 AVE 检查点
+huggingface-cli download yake0409/MokA_AudioVisualText --include "AVE_checkpoint/*" --local-dir MokA_AudioVisualText
+
+# 或者，只下载 MUSIC-AVQA 检查点
+huggingface-cli download yake0409/MokA_AudioVisualText --include "AVQA_checkpoint/*" --local-dir MokA_AudioVisualText
+```
+
+### 使用方法
+
+在推理脚本 `scripts/finetune/infer_ave.sh` 或 `infer_avqa.sh` 中设置：
+```bash
+ckpt_dir=/root/autodl-tmp/MokA/MokA_AudioVisualText/AVE_checkpoint
+```
+
+然后运行推理即可得到结果。
+
 

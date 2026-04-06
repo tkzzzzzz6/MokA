@@ -217,9 +217,21 @@ __marimo__/
 
 # dataset
 AudioCaps/
+AVE_data/
+MUSIC_AVQA_data/
+smoke_test_data/**/*.mp4
+smoke_test_data/**/*.mp3
+smoke_test_data/**/*.wav
 
 # model
 models/
-dResearchMokAAudioVisualTextsmoke_test_dataAVE_dataaudio_data
-dResearchMokAAudioVisualTextsmoke_test_dataAVE_dataAVE
-dResearchMokAAudioVisualTextsmoke_test_dataAVE_dataconverted_label
+*.bin
+*.pt
+
+# output checkpoints
+results/
+output/
+
+# IDE
+.ipynb_checkpoints
+*.ipynb
