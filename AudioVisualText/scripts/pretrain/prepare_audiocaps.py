@@ -5,6 +5,8 @@ import os
 import subprocess
 import sys
 import socket
+import shutil
+import tempfile
 from tqdm import tqdm
 from typing import Dict, List, Tuple
 
@@ -18,6 +20,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--retry", type=int, default=2, help="Retry count per sample when download fails.")
     parser.add_argument("--hf_endpoint", default="", help="Optional HF endpoint, e.g. https://hf-mirror.com")
     parser.add_argument("--hf_timeout", type=int, default=60, help="HF hub timeout seconds.")
+    parser.add_argument("--cookies_from_browser", default="", help="yt-dlp cookies-from-browser value, e.g. chrome")
+    parser.add_argument("--cookies", default="", help="Path to a cookies.txt file for yt-dlp")
     parser.add_argument("--skip_download", action="store_true", help="Only export train/val json, do not download wav.")
     return parser.parse_args()
 
@@ -69,6 +73,7 @@ def load_subset(dataset_id: str, train_n: int, val_n: int) -> Tuple[List[Dict], 
     from datasets import load_dataset
 
     try:
+        print(f"[prepare] loading dataset {dataset_id} ...")
         ds = load_dataset(dataset_id)
     except Exception as exc:
         raise RuntimeError(
@@ -91,36 +96,115 @@ def load_subset(dataset_id: str, train_n: int, val_n: int) -> Tuple[List[Dict], 
     return train_rows, val_rows
 
 
-def download_clip(youtube_id: str, start_time: float, out_template: str) -> int:
+def download_clip(
+    youtube_id: str,
+    start_time: float,
+    out_template: str,
+    cookies_from_browser: str,
+    cookies_file: str,
+) -> int:
     end_time = start_time + 10.0
     url = f"https://www.youtube.com/watch?v={youtube_id}"
-    cmd = [
+    common = [
         "yt-dlp",
         "--no-playlist",
         "--force-overwrites",
-        "--download-sections",
-        f"*{start_time}-{end_time}",
-        "-x",
-        "--audio-format",
-        "wav",
-        "--audio-quality",
-        "0",
-        "-o",
-        out_template,
-        url,
+        "--retries",
+        "5",
+        "--fragment-retries",
+        "5",
+        "--socket-timeout",
+        "30",
+        "--force-ipv4",
+        "--remote-components",
+        "ejs:github",
     ]
-    # Show progress output for better user experience
-    proc = subprocess.run(cmd, check=False)
-    return proc.returncode
+
+    if shutil.which("node"):
+        common += ["--js-runtimes", "node"]
+
+    if cookies_from_browser:
+        common += ["--cookies-from-browser", cookies_from_browser]
+    elif cookies_file:
+        common += ["--cookies", cookies_file]
+
+    if cookies_from_browser or cookies_file:
+        clients = ["web", "mweb", "ios"]
+    else:
+        clients = ["android"]
+
+    # Robust path: download full audio first, then trim locally with ffmpeg.
+    # This avoids remote section cutting, which is fragile on unstable networks.
+    tmp_dir = tempfile.mkdtemp(prefix="audiocaps_")
+    try:
+        full_template = os.path.join(tmp_dir, "%(id)s.%(ext)s")
+        proc_full = None
+        for client in clients:
+            full_cmd = common + [
+                "--extractor-args",
+                f"youtube:player_client={client}",
+                "--http-chunk-size",
+                "10M",
+                "-f",
+                "bestaudio/best",
+                "-o",
+                full_template,
+                url,
+            ]
+            proc_full = subprocess.run(full_cmd, check=False)
+            if proc_full.returncode == 0:
+                break
+        if proc_full is None or proc_full.returncode != 0:
+            return 1
+
+        candidates = [
+            os.path.join(tmp_dir, name)
+            for name in os.listdir(tmp_dir)
+            if os.path.isfile(os.path.join(tmp_dir, name))
+        ]
+        if not candidates:
+            return 1
+
+        source_audio = candidates[0]
+        wav_path = out_template.replace("%(ext)s", "wav")
+        ffmpeg_cmd = [
+            "ffmpeg",
+            "-y",
+            "-ss",
+            str(start_time),
+            "-t",
+            "10",
+            "-i",
+            source_audio,
+            "-vn",
+            "-acodec",
+            "pcm_s16le",
+            "-ar",
+            "16000",
+            "-ac",
+            "1",
+            wav_path,
+        ]
+        proc_trim = subprocess.run(ffmpeg_cmd, check=False)
+        return proc_trim.returncode
+    finally:
+        shutil.rmtree(tmp_dir, ignore_errors=True)
 
 
-def download_audio(rows: List[Dict], data_dir: str, retry: int) -> Tuple[int, int, int, List[str]]:
+def download_audio(
+    rows: List[Dict],
+    data_dir: str,
+    retry: int,
+    cookies_from_browser: str,
+    cookies_file: str,
+) -> Tuple[int, int, int, List[str]]:
     seen = set()
     ok = 0
     fail = 0
     skip = 0
     missing = []
 
+    print(f"[prepare] start downloading {len(rows)} audio clips ...")
     for row in tqdm(rows, desc="Downloading audio"):
         audiocap_id = row["audiocap_id"]
         if audiocap_id in seen:
@@ -135,7 +219,13 @@ def download_audio(rows: List[Dict], data_dir: str, retry: int) -> Tuple[int, in
         output_template = os.path.join(data_dir, f"{audiocap_id}.%(ext)s")
         success = False
         for _ in range(retry + 1):
-            code = download_clip(row["youtube_id"], row["start_time"], output_template)
+            code = download_clip(
+                row["youtube_id"],
+                row["start_time"],
+                output_template,
+                cookies_from_browser,
+                cookies_file,
+            )
             if code == 0 and os.path.exists(wav_path):
                 success = True
                 break
@@ -176,8 +266,21 @@ def main() -> int:
         print("[prepare] skip_download=True, stop after json export")
         return 0
 
+    if args.cookies_from_browser:
+        print(f"[prepare] yt-dlp auth via browser cookies: {args.cookies_from_browser}")
+    elif args.cookies:
+        print(f"[prepare] yt-dlp auth via cookies file: {args.cookies}")
+    else:
+        print("[prepare] yt-dlp auth: none (may fail with YouTube bot checks)")
+
     all_rows = train_rows + val_rows
-    ok, fail, skip, missing = download_audio(all_rows, data_dir, args.retry)
+    ok, fail, skip, missing = download_audio(
+        all_rows,
+        data_dir,
+        args.retry,
+        args.cookies_from_browser,
+        args.cookies,
+    )
 
     missing_path = os.path.join(out_dir, "missing_ids.txt")
     with open(missing_path, "w", encoding="utf-8") as f:
