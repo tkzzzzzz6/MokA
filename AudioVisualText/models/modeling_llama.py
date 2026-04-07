@@ -896,6 +896,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
     def prepare_inputs_for_generation(
         self, input_ids_all, past_key_values=None, attention_mask=None, inputs_embeds=None, **kwargs
     ):
+        modality_maks = []
         if isinstance(input_ids_all, list):
             input_ids = input_ids_all[0]
             modality_maks=input_ids_all[1:]

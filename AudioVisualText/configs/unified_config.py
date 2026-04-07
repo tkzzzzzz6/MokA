@@ -51,6 +51,7 @@ class DataArguments:
     image_caption_task: bool = field(default=False)
     video_caption_task: bool = field(default=False)
     audio_caption_task: bool = field(default=False)
+    audiocaps_data_root: str = field(default='prepared_datasets/AudioCaps')
     # fine-tune
     avqa_task: bool = field(default=False)
     ave_task: bool = field(default=False)

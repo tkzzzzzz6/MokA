@@ -5,6 +5,7 @@ import os
 import subprocess
 import sys
 import socket
+from tqdm import tqdm
 from typing import Dict, List, Tuple
 
 
@@ -108,7 +109,8 @@ def download_clip(youtube_id: str, start_time: float, out_template: str) -> int:
         out_template,
         url,
     ]
-    proc = subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
+    # Show progress output for better user experience
+    proc = subprocess.run(cmd, check=False)
     return proc.returncode
 
 
@@ -119,7 +121,7 @@ def download_audio(rows: List[Dict], data_dir: str, retry: int) -> Tuple[int, in
     skip = 0
     missing = []
 
-    for row in rows:
+    for row in tqdm(rows, desc="Downloading audio"):
         audiocap_id = row["audiocap_id"]
         if audiocap_id in seen:
             continue
@@ -140,9 +142,11 @@ def download_audio(rows: List[Dict], data_dir: str, retry: int) -> Tuple[int, in
 
         if success:
             ok += 1
+            tqdm.write(f"[ok] {audiocap_id}")
         else:
             fail += 1
             missing.append(audiocap_id)
+            tqdm.write(f"[fail] {audiocap_id}")
 
     return ok, fail, skip, missing
 

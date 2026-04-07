@@ -31,7 +31,7 @@ class VisualEncoder(nn.Module):
 
     def __init__(
         self,
-        model_name_or_path = 'clip-vit-large-patch14',
+        model_name_or_path = 'models/clip-vit-large-patch14',
         select_layer_list = [-11,-1],
         select_feature = 'patch',
     ) -> None:
@@ -84,7 +84,7 @@ class VisualEncoder(nn.Module):
 class VLProjector(nn.Module):
     def __init__(
         self,
-        bert_ckpt_path = 'google-bert-base-uncased', 
+        bert_ckpt_path = 'models/google-bert-base-uncased', 
         hidden_size = 1024,
         image_token_nums = 256,
         num_query_token = 32, 
@@ -169,8 +169,8 @@ class VLProjector(nn.Module):
 class AudioEncoder(nn.Module):
 
     def __init__(
-        self, 
-        ckpt_path = 'BEATs_iter3_plus_AS2M_finetuned_on_AS2M_cpt2.pt'
+        self,
+        ckpt_path = 'models/BEATs_iter3_plus_AS2M_finetuned_on_AS2M_cpt2.pt'
     ) -> None:
         super().__init__()
 
@@ -204,8 +204,8 @@ class AudioEncoder(nn.Module):
 
 class ALProjector(nn.Module):
     def __init__(
-        self, 
-        bert_ckpt_path = 'google-bert-base-uncased', 
+        self,
+        bert_ckpt_path = 'models/google-bert-base-uncased', 
         hidden_size = 768, 
         num_query_token = 32, 
         num_hidden_layers = 2, 

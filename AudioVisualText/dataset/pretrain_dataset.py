@@ -189,14 +189,18 @@ class PretrainDataset(Dataset):
         instruction = sample['instruction']
         output = sample['output']
         task_name = sample['task_name']
-        if self.tokenizer is not None and hasattr(self.tokenizer,'apply_chat_template'):
+        # For LLaMA-2, no chat_template needed, use simple format
+        if self.tokenizer is not None and hasattr(self.tokenizer,'apply_chat_template') and self.tokenizer.chat_template is not None:
             messages = [
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": instruction},
             ]
             instruction = self.tokenizer.apply_chat_template(conversation=messages,add_generation_prompt=True,tokenize=False)
             output = output + '<|eot_id|>'  # qwen2
-            #output = output + '  <|endoftext|>'  # llama2
+        else:
+            # llama2 - no chat template needed
+            instruction = "### System: You are a helpful assistant.\n### User: " + instruction + "\n### Assistant: "
+            output = output + ' </s>'  # llama2
 
         data = {
             'instruction':instruction,
@@ -330,7 +334,9 @@ def get_dataset_collator(
             image_size=data_args.image_size,
             video_frame_nums=data_args.video_frame_nums,
             image_caption_task=data_args.image_caption_task,
+            video_llava_data_root=data_args.video_llava_data_root if hasattr(data_args, 'video_llava_data_root') else 'video-llava',
             video_caption_task=data_args.video_caption_task,
+            audiocaps_data_root=data_args.audiocaps_data_root,
             audio_caption_task=data_args.audio_caption_task,
             video_processor=image_processor,
             tokenizer=tokenizer,

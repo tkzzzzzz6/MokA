@@ -47,11 +47,11 @@ from transformers.integrations import PeftAdapterMixin, deepspeed_config, is_dee
 from transformers.pytorch_utils import (  # noqa: F401
     Conv1D,
     apply_chunking_to_forward,
-    find_pruneable_heads_and_indices,
+    find_pruneable_heads_and_indices,  # not available in this version, not used
     id_tensor_storage,
     is_torch_greater_or_equal_than_1_13,
-    prune_conv1d_layer,
-    prune_layer,
+    prune_conv1d_layer,  # not available in this version, not used
+    prune_layer,  # not available in this version, not used
     prune_linear_layer,
 )
 from transformers.safetensors_conversion import auto_conversion
@@ -60,11 +60,11 @@ from transformers.utils import (
     ADAPTER_WEIGHTS_NAME,
     CONFIG_NAME,
     DUMMY_INPUTS,
-    FLAX_WEIGHTS_NAME,
+    FLAX_WEIGHTS_NAME,  # not available in this version, not used
     SAFE_WEIGHTS_INDEX_NAME,
     SAFE_WEIGHTS_NAME,
-    TF2_WEIGHTS_NAME,
-    TF_WEIGHTS_NAME,
+    TF2_WEIGHTS_NAME,  # not available in this version, not used
+    TF_WEIGHTS_NAME,  # not available in this version, not used
     WEIGHTS_INDEX_NAME,
     WEIGHTS_NAME,
     ContextManagers,
@@ -72,25 +72,35 @@ from transformers.utils import (
     PushToHubMixin,
     cached_file,
     copy_func,
-    download_url,
+    download_url,  # not available in this version, not used
     extract_commit_hash,
     has_file,
-    is_accelerate_available,
-    is_auto_awq_available,
-    is_auto_gptq_available,
-    is_bitsandbytes_available,
-    is_flash_attn_2_available,
-    is_offline_mode,
-    is_optimum_available,
-    is_peft_available,
-    is_remote_url,
-    is_safetensors_available,
-    is_torch_sdpa_available,
-    is_torch_tpu_available,
     logging,
     replace_return_docstrings,
     strtobool,
 )
+from transformers.utils.import_utils import (
+    is_accelerate_available,
+    is_auto_awq_available,  # renamed to is_llm_awq_available, not needed for smoke test
+    is_auto_gptq_available,  # not available in this version, not needed for smoke test
+    is_bitsandbytes_available,
+    is_flash_attn_2_available,
+    # is_offline_mode moved in this transformers version, we don't need real check - all files local
+    # is_optimum_available,  # not needed for smoke test
+    is_peft_available,
+    is_safetensors_available,
+    is_torch_sdpa_available,
+)
+
+# Define is_offline_mode ourselves since we don't need it for local files
+def is_offline_mode():
+    return False
+from transformers.utils.hub import is_remote_url
+
+# is_torch_tpu_available removed from transformers, we don't use TPU so just return False
+def is_torch_tpu_available():
+    return False
+
 from transformers.utils.hub import convert_file_size_to_int, create_and_tag_model_card, get_checkpoint_shard_files
 from transformers.utils.import_utils import (
     ENV_VARS_TRUE_VALUES,

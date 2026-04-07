@@ -312,8 +312,14 @@ class UnifiedTestDataset(Dataset):
 
 
     def add_ave_task_samples(self):
-        ave_annotation_path = 'AVE_data/test_samples_ave.json'
-        ave_data_root = 'AVE_data'
+        # For smoke test, use smoke_test_data if it exists
+        import os
+        if os.path.exists('smoke_test_data/AVE_data/test_samples_ave.json'):
+            ave_annotation_path = 'smoke_test_data/AVE_data/test_samples_ave.json'
+            ave_data_root = 'smoke_test_data/AVE_data'
+        else:
+            ave_annotation_path = 'AVE_data/test_samples_ave.json'
+            ave_data_root = 'AVE_data'
         tot = 0
         with open(ave_annotation_path,'r') as f:
             samples = json.load(f)

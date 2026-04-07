@@ -11,7 +11,7 @@ RANK=0
 
 # ========== PLEASE MODIFY THESE PATHS ==========
 llama_ckpt_path=/root/autodl-tmp/MokA/AudioVisualText/models/Llama-2-7b-chat-hf
-ckpt_dir=YOUR_CHECKPOINT_PATH  # Path to your fine-tuned checkpoint (after training)
+ckpt_dir=/root/autodl-tmp/MokA/AudioVisualText/AVE_checkpoint/AVE_checkpoint  # Path to your fine-tuned checkpoint (after training)
 vit_ckpt_path=/root/autodl-tmp/MokA/AudioVisualText/models/clip-vit-large-patch14
 BEATs_ckpt_path=/root/autodl-tmp/MokA/AudioVisualText/models/BEATs_iter3_plus_AS2M_finetuned_on_AS2M_cpt2.pt
 # ==============================================

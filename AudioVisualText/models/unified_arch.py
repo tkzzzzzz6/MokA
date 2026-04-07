@@ -21,14 +21,14 @@ class UnifiedMetaModel:
         self,
         d_model = 3584,
         # visual
-        vit_ckpt_path = 'clip-vit-large-patch14',
+        vit_ckpt_path = 'models/clip-vit-large-patch14',
         select_layer_list = [-11,-1],
         select_feature = 'patch',
         image_size = 224,
         patch_size = 14,
         visual_query_token_nums = 32,
         # audio
-        BEATs_ckpt_path = 'BEATs_iter3_plus_AS2M_finetuned_on_AS2M_cpt2.ptt',
+        BEATs_ckpt_path = 'models/BEATs_iter3_plus_AS2M_finetuned_on_AS2M_cpt2.pt',
         audio_query_token_nums = 32,
         visual_branch = False,
         audio_branch = False,

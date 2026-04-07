@@ -11,6 +11,16 @@ try:
 except:
     print('no npu!')
 
+# Monkey patch: fix accelerate compatibility - ignore dispatch_batches parameter that newer transformers passes
+from accelerate import Accelerator
+original_init = Accelerator.__init__
+
+def patched_init(self, *args, **kwargs):
+    kwargs.pop('dispatch_batches', None)
+    original_init(self, *args, **kwargs)
+
+Accelerator.__init__ = patched_init
+
 import transformers
 
 from configs.unified_config import ModelArguments,DataArguments,TrainingArguments

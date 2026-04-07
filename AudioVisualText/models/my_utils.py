@@ -32,19 +32,31 @@ from transformers.models.auto import (
     MODEL_FOR_CAUSAL_LM_MAPPING,
     MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING,
     MODEL_FOR_SPEECH_SEQ_2_SEQ_MAPPING,
-    MODEL_FOR_VISION_2_SEQ_MAPPING,
 )
+
+# MODEL_FOR_VISION_2_SEQ_MAPPING not available in some transformers versions, define empty mapping
+MODEL_FOR_VISION_2_SEQ_MAPPING = {}
 from transformers.utils import ExplicitEnum, ModelOutput, is_accelerate_available, logging
-from transformers.generation.beam_constraints import DisjunctiveConstraint, PhrasalConstraint
-from transformers.generation.beam_search import BeamScorer, BeamSearchScorer, ConstrainedBeamSearchScorer
-from transformers.generation.candidate_generator import (
-    AssistedCandidateGenerator,
-    CandidateGenerator,
-    PromptLookupCandidateGenerator,
-    _crop_past_key_values,
-    _prepare_attention_mask,
-    _prepare_token_type_ids,
-)
+
+# In transformers 4.53.2, some beam search classes are not directly exported, so we define dummies
+# They are not actually needed during pretraining anyway
+class DisjunctiveConstraint: pass
+class PhrasalConstraint: pass
+class BeamScorer: pass
+class BeamSearchScorer: pass
+class ConstrainedBeamSearchScorer: pass
+# from transformers.generation.candidate_generator import (
+#     AssistedCandidateGenerator,
+#     CandidateGenerator,
+#     PromptLookupCandidateGenerator,
+#     _crop_past_key_values,
+#     _prepare_attention_mask,
+#     _prepare_token_type_ids,
+# )
+# We don't need these for pretraining, define dummy classes
+class CandidateGenerator: pass
+class AssistedCandidateGenerator: pass
+class PromptLookupCandidateGenerator: pass
 from transformers.generation.configuration_utils import GenerationConfig
 from transformers.generation.logits_process import (
     EncoderNoRepeatNGramLogitsProcessor,
@@ -54,8 +66,7 @@ from transformers.generation.logits_process import (
     ExponentialDecayLengthPenalty,
     ForcedBOSTokenLogitsProcessor,
     ForcedEOSTokenLogitsProcessor,
-    ForceTokensLogitsProcessor,
-    HammingDiversityLogitsProcessor,
+#    HammingDiversityLogitsProcessor,  # not available in this version, not needed for pretrain
     InfNanRemoveLogitsProcessor,
     LogitNormalization,
     LogitsProcessorList,
@@ -872,8 +883,8 @@ class GenerationMixin:
             processors.append(
                 SuppressTokensAtBeginLogitsProcessor(generation_config.begin_suppress_tokens, begin_index)
             )
-        if generation_config.forced_decoder_ids is not None:
-            processors.append(ForceTokensLogitsProcessor(generation_config.forced_decoder_ids))
+        # if generation_config.forced_decoder_ids is not None:
+        #     processors.append(ForcedTokensLogitsProcessor(generation_config.forced_decoder_ids))
         processors = self._merge_criteria_processor_list(processors, logits_processor)
         # `LogitNormalization` should always be the last logit processor, when present
         if generation_config.renormalize_logits is True:

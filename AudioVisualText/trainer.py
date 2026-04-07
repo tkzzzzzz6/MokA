@@ -11,10 +11,12 @@ from transformers.trainer import (
     is_sagemaker_mp_enabled,
     get_parameter_names,
     has_length,
-    ALL_LAYERNORM_LAYERS,
     logger,
     TRAINER_STATE_NAME,
 )
+
+# ALL_LAYERNORM_LAYERS moved in newer transformers versions, define it here
+ALL_LAYERNORM_LAYERS = ["LayerNorm", "LayerNormNone", "LayerNormAffine"]
 
 
 def maybe_zero_3(param, ignore_status=False, name=None):
@@ -163,11 +165,12 @@ class LengthGroupedSampler(Sampler):
 class UnifiedTrainer(Trainer):
 
     def _get_train_sampler(self) -> Optional[torch.utils.data.Sampler]:
-        if self.train_dataset is None or not has_length(self.train_dataset):
+        dataset = self.train_dataset
+        if dataset is None or not has_length(dataset):
             return None
 
         if self.args.group_by_modality_length:
-            lengths = self.train_dataset.modality_lengths
+            lengths = dataset.modality_lengths
             return LengthGroupedSampler(
                 self.args.train_batch_size,
                 world_size=self.args.world_size * self.args.gradient_accumulation_steps,
