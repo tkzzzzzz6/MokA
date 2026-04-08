@@ -50,6 +50,7 @@ class DataArguments:
     image_size = ModelArguments.image_size
     image_caption_task: bool = field(default=False)
     video_caption_task: bool = field(default=False)
+    video_llava_data_root: str = field(default='prepared_datasets/video-llava')
     audio_caption_task: bool = field(default=False)
     audiocaps_data_root: str = field(default='prepared_datasets/AudioCaps')
     # fine-tune

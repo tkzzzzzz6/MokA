@@ -16,7 +16,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--dataset", default="d0rj/audiocaps", help="Hugging Face dataset id.")
     parser.add_argument("--train_n", type=int, default=500, help="Number of train samples.")
     parser.add_argument("--val_n", type=int, default=100, help="Number of validation samples.")
-    parser.add_argument("--out_dir", default="AudioCaps", help="Output folder (relative to AudioVisualText root).")
+    parser.add_argument("--out_dir", default="prepared_datasets/AudioCaps", help="Output folder (relative to AudioVisualText root).")
     parser.add_argument("--retry", type=int, default=2, help="Retry count per sample when download fails.")
     parser.add_argument("--hf_endpoint", default="", help="Optional HF endpoint, e.g. https://hf-mirror.com")
     parser.add_argument("--hf_timeout", type=int, default=60, help="HF hub timeout seconds.")

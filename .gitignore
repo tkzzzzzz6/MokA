@@ -215,6 +215,9 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
+# scripts
+prepare_audiocaps_500_100_windows.ps1
+
 # dataset
 AudioCaps/
 AVE_data/
@@ -222,6 +225,7 @@ MUSIC_AVQA_data/
 smoke_test_data/**/*.mp4
 smoke_test_data/**/*.mp3
 smoke_test_data/**/*.wav
+llava_instruct_150k_aokvqa12k.json
 
 # model
 models/

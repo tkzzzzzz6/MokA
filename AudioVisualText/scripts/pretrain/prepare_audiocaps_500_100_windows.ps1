@@ -2,7 +2,7 @@ Param(
     [string]$Dataset = "d0rj/audiocaps",
     [int]$TrainN = 500,
     [int]$ValN = 100,
-    [string]$OutDir = "AudioCaps",
+    [string]$OutDir = "prepared_datasets/AudioCaps",
     [int]$Retry = 2,
     [int]$HfTimeout = 60,
     [string]$HfEndpoint = "",

@@ -44,10 +44,10 @@ python3 scripts/pretrain/prepare_audiocaps.py \
   --dataset d0rj/audiocaps \
   --train_n 500 \
   --val_n 100 \
-  --out_dir AudioCaps \
+  --out_dir prepared_datasets/AudioCaps \
   --retry 2 \
   --hf_timeout 60 \
   ${HF_ENDPOINT_ARG}
 
-echo "[ok] AudioCaps subset ready under AudioCaps/"
+echo "[ok] AudioCaps subset ready under prepared_datasets/AudioCaps/"
 echo "[next] Run: bash scripts/pretrain/pretrain_audio.sh"

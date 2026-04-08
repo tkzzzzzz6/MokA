@@ -22,6 +22,27 @@ import warnings
 warnings.filterwarnings("ignore")
 from dataset.audio_processor import preprocess
 
+PREPARED_DATA_ROOT = 'prepared_datasets'
+AVQA_ROOT = join(PREPARED_DATA_ROOT, 'MUSIC_AVQA_data')
+AVE_ROOT = join(PREPARED_DATA_ROOT, 'AVE_data')
+
+
+def remap_to_prepared_path(path: str) -> str:
+    if not path:
+        return path
+    if os.path.exists(path):
+        return path
+    normalized = path.replace('\\', '/')
+    if normalized.startswith('MUSIC_AVQA_data/'):
+        candidate = join(PREPARED_DATA_ROOT, normalized)
+        if os.path.exists(candidate):
+            return candidate
+    if normalized.startswith('AVE_data/'):
+        candidate = join(PREPARED_DATA_ROOT, normalized)
+        if os.path.exists(candidate):
+            return candidate
+    return path
+
 class UnifiedDataset(Dataset):
     def __init__(
         self,
@@ -56,7 +77,7 @@ class UnifiedDataset(Dataset):
 
 
     def add_avqa_task_samples(self):
-        avqa_annotation_path = 'MUSIC_AVQA_data/train_samples_with_reasoning_avqa.json'
+        avqa_annotation_path = join(AVQA_ROOT, 'train_samples_with_reasoning_avqa.json')
         tot = 0
         with open(avqa_annotation_path,'r') as f:
             samples = json.load(f)
@@ -64,8 +85,8 @@ class UnifiedDataset(Dataset):
             video_id = sample['video_id']
             question_id = sample['question_id']
             _type = sample['type']
-            video_path = sample['video_path']
-            audio_path = sample['audio_path']
+            video_path = remap_to_prepared_path(sample['video_path'])
+            audio_path = remap_to_prepared_path(sample['audio_path'])
             question = sample['question']
             answer = sample['answer']
             output = sample['label']
@@ -89,8 +110,8 @@ class UnifiedDataset(Dataset):
 
 
     def add_ave_task_samples(self):
-        ave_annotation_path = 'AVE_data/train_samples_ave.json'
-        ave_data_root = 'AVE_data'
+        ave_annotation_path = join(AVE_ROOT, 'train_samples_ave.json')
+        ave_data_root = AVE_ROOT
         tot = 0
         with open(ave_annotation_path,'r') as f:
             samples = json.load(f)
@@ -280,7 +301,7 @@ class UnifiedTestDataset(Dataset):
 
 
     def add_avqa_task_samples(self):
-        avqa_annotation_path = 'MUSIC_AVQA_data/test_samples_avqa.json'
+        avqa_annotation_path = join(AVQA_ROOT, 'test_samples_avqa.json')
         tot = 0
         with open(avqa_annotation_path,'r') as f:
             samples = json.load(f)
@@ -288,8 +309,8 @@ class UnifiedTestDataset(Dataset):
             video_id = sample['video_id']
             question_id = sample['question_id']
             questio_type = sample['type']
-            video_path = sample['video_path']
-            audio_path = sample['audio_path']
+            video_path = remap_to_prepared_path(sample['video_path'])
+            audio_path = remap_to_prepared_path(sample['audio_path'])
             question = sample['question']
             answer = sample['answer']
             instruction = f'This is a video:\n<video_start><video><video_end>\nThis is an audio:\n<audio_start><audio><audio_end>\n<question_start>Please answer this question: {question}<question_end>'
@@ -318,8 +339,8 @@ class UnifiedTestDataset(Dataset):
             ave_annotation_path = 'smoke_test_data/AVE_data/test_samples_ave.json'
             ave_data_root = 'smoke_test_data/AVE_data'
         else:
-            ave_annotation_path = 'AVE_data/test_samples_ave.json'
-            ave_data_root = 'AVE_data'
+            ave_annotation_path = join(AVE_ROOT, 'test_samples_ave.json')
+            ave_data_root = AVE_ROOT
         tot = 0
         with open(ave_annotation_path,'r') as f:
             samples = json.load(f)
